@@ -77,6 +77,8 @@ int main(void)
     ib.Unbind();
     shader.Unbind();
 
+    Renderer renderer;
+
     float redValue = 0.0f;
     float redIncrement = 0.05f;
     //Set the value of the 'u_Color' uniform variable in the shader. Thus passing data from the CPU to the GPU.
@@ -84,16 +86,12 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        renderer.Clear();
 
         shader.Bind();
         shader.SetUniform4f("u_Color", redValue, 0.3f, 0.8f, 1.0f);
 
-        va.Bind();
-        ib.Bind();
-
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        renderer.Draw(va, ib, shader);
 
         if (redValue > 1.0f)
         {

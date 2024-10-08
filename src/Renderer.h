@@ -1,5 +1,8 @@
 #pragma once
 
+#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
 #include <GL/glew.h>
 
 
@@ -15,3 +18,10 @@
 
 void GLClearError();
 bool GLLogCall(const char* function, const char* filePath, int line);
+
+class Renderer
+{
+public:
+    void Clear() const;
+    void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+};
