@@ -47,7 +47,7 @@ int main(void)
 
     //Vertex buffer data
     //Position x, Position y, tex coord x, tex coord y
-    float positions[] = {
+    float vertexData[] = {
         -0.5f, -0.5f, 0.0f, 0.0f, //0
          0.5f, -0.5f, 1.0f, 0.0f, //1
          0.5f,  0.5f, 1.0f, 1.0f, //2
@@ -60,17 +60,16 @@ int main(void)
         2, 3, 0
     };
 
-    //Blending
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
+    unsigned int vertexCount = 4;
+    unsigned int elementsInVertex = 4;
+    VertexBuffer vb(vertexData, vertexCount * elementsInVertex * sizeof(float));
     
-    VertexArray va;
 
     VertexBufferLayout layout;
     layout.Push<float>(2);
     layout.Push<float>(2);
+
+    VertexArray va;
     va.AddBuffer(vb, layout);
 
     IndexBuffer ib(indices, 6);
@@ -79,9 +78,11 @@ int main(void)
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
+    //Creating texture from path and binding it as the active texture
     Texture texture("res/textures/ship.png");
-    texture.Bind();
-    shader.SetUniform1i("u_Texture", 0);
+    unsigned int textureSlot = 0;
+    texture.Bind(textureSlot);
+    shader.SetUniform1i("u_Texture", textureSlot);
 
     va.Unbind();
     vb.Unbind();
@@ -89,6 +90,11 @@ int main(void)
     shader.Unbind();
 
     Renderer renderer;
+
+    //Blending config
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
 
     float redValue = 0.0f;
     float redIncrement = 0.05f;
