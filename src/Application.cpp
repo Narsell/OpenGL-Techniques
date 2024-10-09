@@ -10,6 +10,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -44,12 +45,13 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    //Vertex positions
+    //Vertex buffer data
+    //Position x, Position y, tex coord x, tex coord y
     float positions[] = {
-        -0.5f, -0.5f, //0
-         0.5f, -0.5f, //1
-         0.5f,  0.5f, //2
-        -0.5f,  0.5f, //3
+        -0.5f, -0.5f, 0.0f, 0.0f, //0
+         0.5f, -0.5f, 1.0f, 0.0f, //1
+         0.5f,  0.5f, 1.0f, 1.0f, //2
+        -0.5f,  0.5f, 0.0f, 1.0f  //3
     };
 
     // We define the order in which we want the vertices to be read in OpenGL.
@@ -58,11 +60,16 @@ int main(void)
         2, 3, 0
     };
 
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    //Blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     
     VertexArray va;
 
     VertexBufferLayout layout;
+    layout.Push<float>(2);
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
 
@@ -71,6 +78,10 @@ int main(void)
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+    Texture texture("res/textures/ship.png");
+    texture.Bind();
+    shader.SetUniform1i("u_Texture", 0);
 
     va.Unbind();
     vb.Unbind();
