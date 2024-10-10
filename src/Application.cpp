@@ -1,16 +1,26 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <cassert>
+
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 
 int main(void)
 {
@@ -47,15 +57,17 @@ int main(void)
 
     //Vertex buffer data
     //Position x, Position y, tex coord x, tex coord y
-    float vertexData[] = {
-        -0.5f, -0.5f, 0.0f, 0.0f, //0
-         0.5f, -0.5f, 1.0f, 0.0f, //1
-         0.5f,  0.5f, 1.0f, 1.0f, //2
-        -0.5f,  0.5f, 0.0f, 1.0f  //3
+    float vertexData[] = 
+    {
+        100.0f, 100.0f, 0.0f, 0.0f, //0
+        200.0f, 100.0f, 1.0f, 0.0f, //1
+        200.0f, 200.0f, 1.0f, 1.0f, //2
+        100.0f, 200.0f, 0.0f, 1.0f  //3
     };
 
     // We define the order in which we want the vertices to be read in OpenGL.
-    unsigned int indices[]  = {
+    unsigned int indices[] = 
+    {
         0, 1, 2,
         2, 3, 0
     };
@@ -74,14 +86,21 @@ int main(void)
 
     IndexBuffer ib(indices, 6);
 
+    //Loading vertex and fragment shaders
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
-    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+    //Setting up orthographic projection matrix (to map a 3D space into a 2D) and sets the bounding limits of our window
+    //and converts everything into normalized device coordinates (-1 to 1 in every axis)
+    glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+    //Defines translation of the view (camera)
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.f, 0.0f, 0.0f));
 
     //Creating texture from path and binding it as the active texture
-    Texture texture("res/textures/ship.png");
+    Texture texture("res/textures/meteor.png");
     unsigned int textureSlot = 0;
     texture.Bind(textureSlot);
+    //Sending texture slot to the shader through a uniform
     shader.SetUniform1i("u_Texture", textureSlot);
 
     va.Unbind();
@@ -91,35 +110,54 @@ int main(void)
 
     Renderer renderer;
 
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+    const char* glsl_version = "#version 130";
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
     //Blending config
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
 
-    float redValue = 0.0f;
-    float redIncrement = 0.05f;
-    //Set the value of the 'u_Color' uniform variable in the shader. Thus passing data from the CPU to the GPU.
+    glm::vec3 translation(0.0f, 0.0f, 0.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         renderer.Clear();
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        //Defines translation of the actual vertex in device coords.
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+        //PVM because OpenGL uses column major
+        glm::mat4 mvp = proj * view * model;
+
+        //We then send this MVP matrix to the shader through a uniform
         shader.Bind();
-        shader.SetUniform4f("u_Color", redValue, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         renderer.Draw(va, ib, shader);
 
-        if (redValue > 1.0f)
         {
-            redIncrement = -0.05f;
-        }
-        else if (redValue < 0.0f)
-        {
-            redIncrement = 0.05f;
+            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.f);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         }
 
-        redValue += redIncrement;
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -127,6 +165,10 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;

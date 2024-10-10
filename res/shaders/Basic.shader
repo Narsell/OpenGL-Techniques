@@ -8,9 +8,11 @@ layout(location = 1) in vec2 texCoord;
 //'Varying' variable to pass data from vertex shader to fragment shader.
 out vec2 v_TexCoord;
 
+uniform mat4 u_MVP;
+
 void main()
 {
-    gl_Position = position;
+    gl_Position = u_MVP * position;
     v_TexCoord = texCoord;
 };
 
@@ -21,7 +23,6 @@ out vec4 color;
 in vec2 v_TexCoord;
 
 //Uniforms get data from CPU into the shader (GPU)
-uniform vec4 u_Color;
 uniform sampler2D u_Texture;
 
 void main()
