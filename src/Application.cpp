@@ -59,10 +59,10 @@ int main(void)
     //Position x, Position y, tex coord x, tex coord y
     float vertexData[] = 
     {
-        100.0f, 100.0f, 0.0f, 0.0f, //0
-        200.0f, 100.0f, 1.0f, 0.0f, //1
-        200.0f, 200.0f, 1.0f, 1.0f, //2
-        100.0f, 200.0f, 0.0f, 1.0f  //3
+        0.0f,  0.0f, 0.0f, 0.0f, //0
+        100.0f, 0.0f, 1.0f, 0.0f, //1
+        100.0f, 100.0f, 1.0f, 1.0f, //2
+        0.0f, 100.0f, 0.0f, 1.0f  //3
     };
 
     // We define the order in which we want the vertices to be read in OpenGL.
@@ -94,7 +94,7 @@ int main(void)
     //and converts everything into normalized device coordinates (-1 to 1 in every axis)
     glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     //Defines translation of the view (camera)
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.f, 0.0f, 0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     //Creating texture from path and binding it as the active texture
     Texture texture("res/textures/meteor.png");
@@ -128,7 +128,8 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
 
-    glm::vec3 translation(0.0f, 0.0f, 0.0f);
+    glm::vec3 translationA(200.0f, 0.0f, 0.0f);
+    glm::vec3 translationB(400.0f, 0.0f, 0.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -139,19 +140,36 @@ int main(void)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //Defines translation of the actual vertex in device coords.
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
-        //PVM because OpenGL uses column major
-        glm::mat4 mvp = proj * view * model;
-
-        //We then send this MVP matrix to the shader through a uniform
-        shader.Bind();
-        shader.SetUniformMat4f("u_MVP", mvp);
-
-        renderer.Draw(va, ib, shader);
 
         {
-            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.f);
+            //Defines translation of the actual vertex in device coords.
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+            //PVM because OpenGL uses column major
+            glm::mat4 mvp = proj * view * model;
+
+            shader.Bind();
+            //We then send this MVP matrix to the shader through a uniform
+            shader.SetUniformMat4f("u_MVP", mvp);
+
+            renderer.Draw(va, ib, shader);
+        }
+
+        {
+            //Defines translation of the actual vertex in device coords.
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+            //PVM because OpenGL uses column major
+            glm::mat4 mvp = proj * view * model;
+
+            shader.Bind();
+            //We then send this MVP matrix to the shader through a uniform
+            shader.SetUniformMat4f("u_MVP", mvp);
+
+            renderer.Draw(va, ib, shader);
+        }
+
+        {
+            ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.f);
+            ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.f);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         }
