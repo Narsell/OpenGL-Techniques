@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <cassert>
+#include <vector>
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -23,9 +24,17 @@
 
 #include "tests/TestClearColor.h"
 
+enum class APP_STATE : uint8_t
+{
+    NONE = 0,
+    SELECTION_MENU = 1,
+    IN_TEST = 2
+};
+
 int main(void)
 {
     GLFWwindow* window;
+    APP_STATE appState;
 
     /* Initialize the library */
     if (!glfwInit())
@@ -76,21 +85,53 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
 
-    test::TestClearColor test;
+    test::TestClearColor clearColorTest;
+
+    std::vector<test::TestClearColor> testList;
+    testList.reserve(4);
+    testList.push_back(clearColorTest);
+
+    appState = APP_STATE::SELECTION_MENU;
+    test::Test* selectedTest = nullptr;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         renderer.Clear();
 
-        test.OnUpdate(0.f);
-        test.OnRender();
-
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        test.OnImGuiRender();
+        if (appState == APP_STATE::IN_TEST && selectedTest)
+        {
+            //Selected test update and render updates
+            selectedTest->OnUpdate(0.f);
+            selectedTest->OnRender();
+            selectedTest->OnImGuiRender();
+            
+            //If the back button was pressed, go back and cleanup
+            if (selectedTest->IsBackButtonPressed())
+            {
+                appState = APP_STATE::SELECTION_MENU;
+                selectedTest->OnCleanUp();
+                selectedTest = nullptr;
+            }
+        }
+        else if (appState == APP_STATE::SELECTION_MENU)
+        {
+            //Iterate through the test list and use the selected one.
+            for (test::Test& test : testList)
+            {
+                if (ImGui::Button(test.GetName().c_str(), ImVec2(90, 35)))
+                {
+                    std::cout << test.GetName() << " selected!\n";
+                    appState = APP_STATE::IN_TEST;
+                    selectedTest = &test;
+                    break;
+                }
+            }
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

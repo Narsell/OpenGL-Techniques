@@ -3,7 +3,7 @@
 #include "imgui/imgui.h"
 
 test::TestClearColor::TestClearColor()
-	:m_ClearColor{ 0.2f, 0.3f, 0.8, 1.0f }
+	:Test("Clear Color"), m_ClearColor{0.2f, 0.3f, 0.8, 1.0f}
 {
 }
 
@@ -24,4 +24,9 @@ void test::TestClearColor::OnRender()
 void test::TestClearColor::OnImGuiRender()
 {
 	ImGui::ColorEdit4("Clear Color", m_ClearColor);
+}
+
+void test::TestClearColor::OnCleanUp()
+{
+	glClearColor(defaults.clearColor[0], defaults.clearColor[1], defaults.clearColor[2], defaults.clearColor[3]);
 }

@@ -13,6 +13,7 @@ namespace test
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
+		void OnCleanUp() override;
 
 	private:
 
