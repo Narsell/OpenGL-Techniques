@@ -23,6 +23,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "tests/TestClearColor.h"
+#include "tests/TextureTest.h"
 
 enum class APP_STATE : uint8_t
 {
@@ -86,10 +87,12 @@ int main(void)
     glBlendEquation(GL_FUNC_ADD);
 
     test::TestClearColor clearColorTest;
+    test::TextureTest textureTest;
 
-    std::vector<test::TestClearColor> testList;
+    std::vector<test::Test*> testList;
     testList.reserve(4);
-    testList.push_back(clearColorTest);
+    testList.push_back(&clearColorTest);
+    testList.push_back(&textureTest);
 
     appState = APP_STATE::SELECTION_MENU;
     test::Test* selectedTest = nullptr;
@@ -121,16 +124,18 @@ int main(void)
         else if (appState == APP_STATE::SELECTION_MENU)
         {
             //Iterate through the test list and use the selected one.
-            for (test::Test& test : testList)
+            ImGui::Begin("Test List");
+            for (test::Test* test : testList)
             {
-                if (ImGui::Button(test.GetName().c_str(), ImVec2(90, 35)))
+                if (ImGui::Button(test->GetName().c_str(), ImVec2(90, 35)))
                 {
-                    std::cout << test.GetName() << " selected!\n";
+                    std::cout << test->GetName() << " selected!\n";
                     appState = APP_STATE::IN_TEST;
-                    selectedTest = &test;
+                    selectedTest = test;
                     break;
                 }
             }
+            ImGui::End();
         }
 
         ImGui::Render();

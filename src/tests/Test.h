@@ -10,6 +10,10 @@ namespace test
 		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
+	/*
+	* Base test interface
+	* Important: Test::OnImGuiRender must be called on all derived classes that implement this function.
+	*/
 	class Test
 	{
 	public:
@@ -23,14 +27,19 @@ namespace test
 
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
-		virtual void OnImGuiRender() {}
+		virtual void OnImGuiRender() 
+		{
+			ImGui::Begin("Test Parameters");
+		}
 		virtual void OnCleanUp() {}
 
 		inline const std::string& GetName() const { return m_name; };
 
 		virtual const bool IsBackButtonPressed() 
 		{
-			return ImGui::Button("Back", ImVec2(50, 25));
+			const bool isBackPressed = ImGui::Button("Back", ImVec2(50, 25));
+			ImGui::End();
+			return isBackPressed;
 		}
 
 	protected:
