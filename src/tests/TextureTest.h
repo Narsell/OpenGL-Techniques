@@ -30,17 +30,14 @@ namespace test {
 
 		Shader shader;
 
-		glm::vec3 translationA;
-		glm::vec3 translationB;
-		glm::mat4 proj;
-		glm::mat4 view;
-
-		unsigned int vertexCount = 4;
-		unsigned int elementsInVertex = 4;
+		glm::vec3 m_TranslationA;
+		glm::vec3 m_TranslationB;
+		glm::mat4 m_ProjMatrix;
+		glm::mat4 m_ViewMatrix;
 
 		//Vertex buffer data
 		//Position x, Position y, tex coord x, tex coord y
-		float vertexData[16] = 
+		float m_VertexData[16] = 
 		{
 			0.0f,   0.0f,   0.0f, 0.0f, //0
 			100.0f, 0.0f,   1.0f, 0.0f, //1
@@ -48,18 +45,21 @@ namespace test {
 			0.0f,   100.0f, 0.0f, 1.0f  //3
 		};
 
+		unsigned int m_VertexCount = 4;
+		unsigned int m_ElementsPerVertex = 4;
+
 		//Defines the order in which we want the vertices to be read in OpenGL.
-		unsigned int indices[6] =
+		unsigned int m_Indices[6] =
 		{
 			0, 1, 2,
 			2, 3, 0
 		};
 
-		VertexBuffer vb;
-		VertexBufferLayout layout;
-		VertexArray va;
-		IndexBuffer ib;
-		Texture texture;
-		unsigned int textureSlot = 0;
+		VertexBuffer m_VertexBuffer;
+		VertexBufferLayout m_VertexLayout;
+		VertexArray m_VertexArray;
+		IndexBuffer m_IndexBuffer;
+		Texture m_Texture;
+		unsigned int m_TextureSlot = 0;
 	};
 }

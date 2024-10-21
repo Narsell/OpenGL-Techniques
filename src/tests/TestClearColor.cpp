@@ -3,7 +3,7 @@
 #include "imgui/imgui.h"
 
 test::TestClearColor::TestClearColor()
-	:Test("Clear Color"), m_ClearColor{0.2f, 0.3f, 0.8, 1.0f}
+	:Test("Clear Color"), m_ClearColor{0.2f, 0.3f, 0.8f, 1.0f}
 {
 }
 

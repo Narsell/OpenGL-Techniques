@@ -27,8 +27,8 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
         const auto& attributeElement = attributes[i];
         glEnableVertexAttribArray(i);
         //layout.GetStride() gets the full size across all attributes, and offsets increments according to each attribute element count * size
-        glVertexAttribPointer(i, attributeElement.count, attributeElement.type, attributeElement.normalized, layout.GetStride(), (const void*)offset);
-
+        glVertexAttribPointer(i, attributeElement.count, attributeElement.type, attributeElement.normalized, layout.GetStride(), (const void*)(offset));
+        //Offset to the next set of attributes (In this example: pos.x, pos/y, texCoord.x, testCoord.y it would be the offset between textCoord.x and pos.x)
         offset += attributeElement.count * VertexBufferElement::GetSizeOfType(attributeElement.type);
     }
 
