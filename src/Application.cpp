@@ -22,7 +22,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "tests/TestClearColor.h"
+#include "tests/ClearColorTest.h"
 #include "tests/TextureTest.h"
 
 enum class APP_STATE : uint8_t
@@ -69,9 +69,6 @@ int main(void)
     Renderer renderer;
 
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -86,7 +83,7 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
 
-    test::TestClearColor clearColorTest;
+    test::ClearColorTest clearColorTest;
     test::TextureTest textureTest;
 
     std::vector<test::Test*> testList;

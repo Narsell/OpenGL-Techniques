@@ -7,7 +7,7 @@ namespace test
 {
 	struct Defaults
 	{
-		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	};
 
 	/*
@@ -27,20 +27,12 @@ namespace test
 
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
-		virtual void OnImGuiRender() 
-		{
-			ImGui::Begin("Test Parameters");
-		}
+		virtual void OnImGuiRender();
 		virtual void OnCleanUp() {}
 
 		inline const std::string& GetName() const { return m_name; };
 
-		virtual const bool IsBackButtonPressed() 
-		{
-			const bool isBackPressed = ImGui::Button("Back", ImVec2(50, 25));
-			ImGui::End();
-			return isBackPressed;
-		}
+		virtual const bool IsBackButtonPressed();
 
 	protected:
 
