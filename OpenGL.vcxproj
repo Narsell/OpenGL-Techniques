@@ -144,6 +144,7 @@
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\tests\BatchRenderingTest.cpp" />
     <ClCompile Include="src\tests\Test.cpp" />
     <ClCompile Include="src\tests\ClearColorTest.cpp" />
     <ClCompile Include="src\tests\TextureTest.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\tests\BatchRenderingTest.h" />
     <ClInclude Include="src\tests\Test.h" />
     <ClInclude Include="src\tests\ClearColorTest.h" />
     <ClInclude Include="src\tests\TextureTest.h" />

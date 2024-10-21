@@ -24,6 +24,7 @@
 
 #include "tests/ClearColorTest.h"
 #include "tests/TextureTest.h"
+#include "tests/BatchRenderingTest.h"
 
 enum class APP_STATE : uint8_t
 {
@@ -85,11 +86,13 @@ int main(void)
 
     test::ClearColorTest clearColorTest;
     test::TextureTest textureTest;
+    test::BatchRenderingTest batchRenderingTest;
 
     std::vector<test::Test*> testList;
     testList.reserve(4);
     testList.push_back(&clearColorTest);
     testList.push_back(&textureTest);
+    testList.push_back(&batchRenderingTest);
 
     appState = APP_STATE::SELECTION_MENU;
     test::Test* selectedTest = nullptr;
