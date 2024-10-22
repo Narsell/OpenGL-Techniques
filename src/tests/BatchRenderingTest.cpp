@@ -8,25 +8,27 @@ test::BatchRenderingTest::BatchRenderingTest()
 	:Test("Batch Rendering"), 
     shader("res/shaders/Basic.shader"), 
     m_Translation(0.0f, 50.0f, 0.0f),
-    //Setting up orthographic projection matrix (to map a 3D space into a 2D) and sets the bounding limits of our window
-    //and converts everything into normalized device coordinates (-1 to 1 in every axis)
+    // Setting up orthographic projection matrix (to map a 3D space into a 2D) and sets the bounding limits of our window
+    // and converts everything into normalized device coordinates (-1 to 1 in every axis)
     m_ProjMatrix(glm::ortho(0.0f, 640.f, 0.0f, 480.f, -1.0f, 1.0f)),
-    //Defines translation of the view (camera)
-    m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)))
+    // Defines translation of the view (camera)
+    m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))),
+    m_MeteorTexture("res/textures/meteor.png"),
+    m_ShipTexture("res/textures/ship.png")
 {
-    //Vertex buffer data
-    //Position x, Position y, tex coord x, tex coord y
-    float vertexData [32] =
+    //V ertex buffer data
+    // Position (x, y), color vec 4 (r, g, b, a), texture coords (x, y), texture ID (0 = none)
+    float vertexData [] =
     {
-        100.0f, 0.0f,   0.0f, 0.0f, //0
-        200.0f, 0.0f,   1.0f, 0.0f, //1
-        200.0f, 100.0f, 1.0f, 1.0f, //2
-        100.0f, 100.0f, 0.0f, 1.0f, //3
+        100.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 0.0f, 0.0f, //0
+        200.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 0.0f, 0.0f, //1
+        200.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 1.0f, 0.0f, //2
+        100.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 1.0f, 0.0f, //3
 
-        300.0f, 0.0f,   0.0f, 0.0f, //4
-        400.0f, 0.0f,   1.0f, 0.0f, //5
-        400.0f, 100.0f, 1.0f, 1.0f, //6
-        300.0f, 100.0f, 0.0f, 1.0f  //7
+        300.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 0.0f, 1.0f, //4
+        400.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 0.0f, 1.0f, //5
+        400.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 1.0f, 1.0f, //6
+        300.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 1.0f, 1.0f  //7
     };
 
     // Create and bind VAO (Vertex Array Object)
@@ -39,11 +41,18 @@ test::BatchRenderingTest::BatchRenderingTest()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
     // Setting up vertex attributes
-    glEnableVertexAttribArray(0);
-    // Position vertex attribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    // Text coords vertex attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)(sizeof(float) * 2));
+    // position attribute
+    glEnableVertexArrayAttrib(m_QuadVA, 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), 0);
+    // color attribute
+    glEnableVertexArrayAttrib(m_QuadVA, 1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (const void*)(2 * sizeof(float)));
+    // text coord attribute
+    glEnableVertexArrayAttrib(m_QuadVA, 2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (const void*)(6 * sizeof(float)));
+    // text ID attribute
+    glEnableVertexArrayAttrib(m_QuadVA, 3);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (const void*)(8 * sizeof(float)));
 
     unsigned int indices [12] =
     {
@@ -78,9 +87,16 @@ void test::BatchRenderingTest::OnRender()
     //Bind shader
     glUseProgram(shader.GetRendererId());
 
+    int texturesUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_Textures");
+    int textureSamplers[2] = { 0, 1 };
+    glUniform1iv(texturesUniformLoc, 2, textureSamplers);
+
     //Get MVP uniform location and send data to that uniform location.
-    int location = glGetUniformLocation(shader.GetRendererId(), "u_MVP");
-    glUniformMatrix4fv(location, 1, GL_FALSE, &mvp[0][0]);
+    int mvpUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_MVP");
+    glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, &mvp[0][0]);
+
+    glBindTextureUnit(0, m_MeteorTexture.GetRendererId());
+    glBindTextureUnit(1, m_ShipTexture.GetRendererId());
 
     //Bind VAO and draw!
     glBindVertexArray(m_QuadVA);

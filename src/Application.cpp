@@ -85,13 +85,13 @@ int main(void)
     glBlendEquation(GL_FUNC_ADD);
 
     test::ClearColorTest clearColorTest;
-    test::TextureTest textureTest;
+    //test::TextureTest textureTest;
     test::BatchRenderingTest batchRenderingTest;
 
     std::vector<test::Test*> testList;
     testList.reserve(4);
     testList.push_back(&clearColorTest);
-    testList.push_back(&textureTest);
+    //testList.push_back(&textureTest);
     testList.push_back(&batchRenderingTest);
 
     appState = APP_STATE::SELECTION_MENU;

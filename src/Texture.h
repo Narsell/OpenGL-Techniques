@@ -9,6 +9,8 @@ public:
 	Texture(const std::string& path);
 	~Texture();
 
+	inline unsigned int GetRendererId() const { return m_RendererId; }
+
 	void Bind(unsigned int slot= 0) const;
 	void Unbind() const;
 

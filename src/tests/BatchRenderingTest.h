@@ -35,5 +35,8 @@ namespace test {
 		glm::mat4 m_ViewMatrix;
 
 		GLuint m_QuadVA, m_QuadVB, m_QuadIB;
+
+		Texture m_MeteorTexture;
+		Texture m_ShipTexture;
 	};
 }
