@@ -100,5 +100,12 @@ void test::BatchRenderingTest::OnImGuiRender()
 
 void test::BatchRenderingTest::OnCleanUp()
 {
-
+    //Unbind Vertex Array - VAO
+    glBindVertexArray(0);
+    //Unbind Vertex Buffer - VB
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //Unbind Index Buffer - IB
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //Unbind Shader
+    glUseProgram(0);
 }

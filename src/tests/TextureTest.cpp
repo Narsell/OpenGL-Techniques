@@ -7,11 +7,11 @@
 test::TextureTest::TextureTest()
 	:Test("Texture Test"), 
     shader("res/shaders/Basic.shader"), 
-    m_TranslationA(200.0f, 0.0f, 0.0f),
-    m_TranslationB(400.0f, 0.0f, 0.0f),
+    m_TranslationA(200.0f, 25.0f, 0.0f),
+    m_TranslationB(400.0f, 25.0f, 0.0f),
     //Setting up orthographic projection matrix (to map a 3D space into a 2D) and sets the bounding limits of our window
     //and converts everything into normalized device coordinates (-1 to 1 in every axis)
-    m_ProjMatrix(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
+    m_ProjMatrix(glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f)),
     //Defines translation of the view (camera)
     m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))),
     m_VertexBuffer(m_VertexData, m_VertexCount* m_ElementsPerVertex * sizeof(float)),
