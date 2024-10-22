@@ -7,10 +7,10 @@
 test::BatchRenderingTest::BatchRenderingTest()
 	:Test("Batch Rendering"), 
     shader("res/shaders/Basic.shader"), 
-    m_Translation(0.0f, 0.0f, 0.0f),
+    m_Translation(0.0f, 50.0f, 0.0f),
     //Setting up orthographic projection matrix (to map a 3D space into a 2D) and sets the bounding limits of our window
     //and converts everything into normalized device coordinates (-1 to 1 in every axis)
-    m_ProjMatrix(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
+    m_ProjMatrix(glm::ortho(0.0f, 640.f, 0.0f, 480.f, -1.0f, 1.0f)),
     //Defines translation of the view (camera)
     m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))),
     m_VertexBuffer(m_VertexData, m_VertexCount* m_ElementsPerVertex * sizeof(float)),
