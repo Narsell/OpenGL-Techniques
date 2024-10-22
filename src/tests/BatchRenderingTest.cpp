@@ -12,20 +12,52 @@ test::BatchRenderingTest::BatchRenderingTest()
     //and converts everything into normalized device coordinates (-1 to 1 in every axis)
     m_ProjMatrix(glm::ortho(0.0f, 640.f, 0.0f, 480.f, -1.0f, 1.0f)),
     //Defines translation of the view (camera)
-    m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))),
-    m_VertexBuffer(m_VertexData, m_VertexCount* m_ElementsPerVertex * sizeof(float)),
-    m_IndexBuffer(m_Indices, 12),
-    m_Texture("res/textures/meteor.png")
+    m_ViewMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)))
 {
-    m_VertexLayout.Push<float>(2);
-    m_VertexLayout.Push<float>(2);
+    //Vertex buffer data
+    //Position x, Position y, tex coord x, tex coord y
+    float vertexData [32] =
+    {
+        100.0f, 0.0f,   0.0f, 0.0f, //0
+        200.0f, 0.0f,   1.0f, 0.0f, //1
+        200.0f, 100.0f, 1.0f, 1.0f, //2
+        100.0f, 100.0f, 0.0f, 1.0f, //3
 
-    m_VertexArray.AddBuffer(m_VertexBuffer, m_VertexLayout);
+        300.0f, 0.0f,   0.0f, 0.0f, //4
+        400.0f, 0.0f,   1.0f, 0.0f, //5
+        400.0f, 100.0f, 1.0f, 1.0f, //6
+        300.0f, 100.0f, 0.0f, 1.0f  //7
+    };
 
-    //Binding texture to a slot
-    m_Texture.Bind(m_TextureSlot);
-    //Sending texture slot to the shader through a uniform
-    shader.SetUniform1i("u_Texture", m_TextureSlot);
+    // Create and bind VAO (Vertex Array Object)
+    glCreateVertexArrays(1, &m_QuadVA);
+    glBindVertexArray(m_QuadVA);
+
+    // Generate, bind and set vertex buffer data.
+    glCreateBuffers(1, &m_QuadVB);
+    glBindBuffer(GL_ARRAY_BUFFER, m_QuadVB);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+    // Setting up vertex attributes
+    glEnableVertexAttribArray(0);
+    // Position vertex attribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    // Text coords vertex attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)(sizeof(float) * 2));
+
+    unsigned int indices [12] =
+    {
+        0, 1, 2,
+        2, 3, 0,
+
+        4, 5, 6,
+        6, 7, 4
+    };
+
+    glCreateBuffers(1, &m_QuadIB);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 }
 
 test::BatchRenderingTest::~BatchRenderingTest()
@@ -38,19 +70,22 @@ void test::BatchRenderingTest::OnUpdate(float deltaTime)
 
 void test::BatchRenderingTest::OnRender()
 {
-    Renderer renderer;
+    //Defines translation of the actual vertex in device coords.
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+    //PVM because OpenGL uses column major
+    glm::mat4 mvp = m_ProjMatrix * m_ViewMatrix * model;
 
-    //Render translation A
-    {
-        //Defines translation of the actual vertex in device coords.
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
-        //PVM because OpenGL uses column major
-        glm::mat4 mvp = m_ProjMatrix * m_ViewMatrix * model;
-        shader.Bind();
-        //We then send this MVP matrix to the shader through a uniform
-        shader.SetUniformMat4f("u_MVP", mvp);
-        renderer.Draw(m_VertexArray, m_IndexBuffer, shader);
-    }
+    //Bind shader
+    glUseProgram(shader.GetRendererId());
+
+    //Get MVP uniform location and send data to that uniform location.
+    int location = glGetUniformLocation(shader.GetRendererId(), "u_MVP");
+    glUniformMatrix4fv(location, 1, GL_FALSE, &mvp[0][0]);
+
+    //Bind VAO and draw!
+    glBindVertexArray(m_QuadVA);
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+
 }
 
 void test::BatchRenderingTest::OnImGuiRender()
@@ -65,9 +100,5 @@ void test::BatchRenderingTest::OnImGuiRender()
 
 void test::BatchRenderingTest::OnCleanUp()
 {
-    m_VertexArray.Unbind();
-    m_VertexBuffer.Unbind();
-    m_IndexBuffer.Unbind();
-    shader.Unbind();
-    m_Texture.Unbind();
+
 }

@@ -22,6 +22,8 @@ public:
 	Shader(const std::string& filepath);
 	~Shader();
 
+	inline unsigned int GetRendererId() const { return m_RendererId; }
+
 	void Bind() const;
 	void Unbind() const;
 
