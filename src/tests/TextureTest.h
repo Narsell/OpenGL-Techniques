@@ -35,18 +35,18 @@ namespace test {
 		glm::mat4 m_ProjMatrix;
 		glm::mat4 m_ViewMatrix;
 
-		//Vertex buffer data
-		//Position x, Position y, tex coord x, tex coord y
-		float m_VertexData[16] = 
+		// Vertex buffer data
+		// Position (x, y), color vec 4 (r, g, b, a), texture coords (x, y), texture ID (0 = none)
+		float m_VertexData[36] = 
 		{
-			0.0f,   0.0f,   0.0f, 0.0f, //0
-			100.0f, 0.0f,   1.0f, 0.0f, //1
-			100.0f, 100.0f, 1.0f, 1.0f, //2
-			0.0f,   100.0f, 0.0f, 1.0f  //3
+			0.0f,   0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 0.0f, 1.0f, //0
+			100.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 0.0f, 1.0f, //1
+			100.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 1.0f, 1.0f, //2
+			0.0f,   100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 1.0f, 1.0f, //3
 		};
 
 		unsigned int m_VertexCount = 4;
-		unsigned int m_ElementsPerVertex = 4;
+		unsigned int m_ElementsPerVertex = 9;
 
 		//Defines the order in which we want the vertices to be read in OpenGL.
 		unsigned int m_Indices[6] =

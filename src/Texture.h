@@ -11,7 +11,7 @@ public:
 
 	inline unsigned int GetRendererId() const { return m_RendererId; }
 
-	void Bind(unsigned int slot= 0) const;
+	void Bind(unsigned int slot=0) const;
 	void Unbind() const;
 
 	inline int GetWidth() const { return m_Width; }

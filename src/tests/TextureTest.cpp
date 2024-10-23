@@ -19,14 +19,11 @@ test::TextureTest::TextureTest()
     m_Texture("res/textures/meteor.png")
 {
     m_VertexLayout.Push<float>(2);
+    m_VertexLayout.Push<float>(4);
     m_VertexLayout.Push<float>(2);
+    m_VertexLayout.Push<float>(1);
 
     m_VertexArray.AddBuffer(m_VertexBuffer, m_VertexLayout);
-
-    //Binding texture to a slot
-    m_Texture.Bind(m_TextureSlot);
-    //Sending texture slot to the shader through a uniform
-    shader.SetUniform1i("u_Texture", m_TextureSlot);
 }
 
 test::TextureTest::~TextureTest()
@@ -40,6 +37,14 @@ void test::TextureTest::OnUpdate(float deltaTime)
 void test::TextureTest::OnRender()
 {
     Renderer renderer;
+
+    //Sending texture slot to the shader through a uniform (array of integers)
+    int textureSamplers[1] = { 0 };
+    shader.SetUniform1iv("u_Textures", 1, textureSamplers);
+
+    //Binding texture to m_TextureSlot slot
+    //glBindTextureUnit(m_TextureSlot, m_Texture.GetRendererId()); //gl4 way
+    m_Texture.Bind(m_TextureSlot);
 
     //Render translation A
     {

@@ -37,6 +37,13 @@ uniform sampler2D u_Textures[2];
 
 void main()
 {
-    int index = int(v_TexIndex);
-    o_Color = texture(u_Textures[index], v_TexCoord);
+    bool displayTexture = bool(v_TexIndex);
+    if(displayTexture)
+    {
+        int index = int(v_TexIndex) - 1;
+        o_Color = texture(u_Textures[index], v_TexCoord);
+    } else
+    {
+        o_Color = v_Color;
+    }
 };

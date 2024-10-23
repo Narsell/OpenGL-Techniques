@@ -16,19 +16,19 @@ test::BatchRenderingTest::BatchRenderingTest()
     m_MeteorTexture("res/textures/meteor.png"),
     m_ShipTexture("res/textures/ship.png")
 {
-    //V ertex buffer data
+    // Vertex buffer data
     // Position (x, y), color vec 4 (r, g, b, a), texture coords (x, y), texture ID (0 = none)
     float vertexData [] =
     {
-        100.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 0.0f, 0.0f, //0
-        200.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 0.0f, 0.0f, //1
-        200.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 1.0f, 0.0f, //2
-        100.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 1.0f, 0.0f, //3
+        100.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 0.0f, 1.0f, //0
+        200.0f, 0.0f,   0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 0.0f, 1.0f, //1
+        200.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 1.0f, 1.0f, 1.0f, //2
+        100.0f, 100.0f, 0.2f, 0.6f, 0.9f, 1.0f, 0.0f, 1.0f, 1.0f, //3
 
-        300.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 0.0f, 1.0f, //4
-        400.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 0.0f, 1.0f, //5
-        400.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 1.0f, 1.0f, //6
-        300.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 1.0f, 1.0f  //7
+        300.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 0.0f, 2.0f, //4
+        400.0f, 0.0f,   1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 0.0f, 2.0f, //5
+        400.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 1.0f, 1.0f, 2.0f, //6
+        300.0f, 100.0f, 1.0f, 0.9f, 0.2f, 1.0f, 0.0f, 1.0f, 2.0f  //7
     };
 
     // Create and bind VAO (Vertex Array Object)
@@ -87,6 +87,7 @@ void test::BatchRenderingTest::OnRender()
     //Bind shader
     glUseProgram(shader.GetRendererId());
 
+    //Getting uniform location and setting uniform value to array of integers containing texture slots
     int texturesUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_Textures");
     int textureSamplers[2] = { 0, 1 };
     glUniform1iv(texturesUniformLoc, 2, textureSamplers);
@@ -95,6 +96,7 @@ void test::BatchRenderingTest::OnRender()
     int mvpUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_MVP");
     glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, &mvp[0][0]);
 
+    //Bind texture ID to texture slot/unit
     glBindTextureUnit(0, m_MeteorTexture.GetRendererId());
     glBindTextureUnit(1, m_ShipTexture.GetRendererId());
 
@@ -124,4 +126,6 @@ void test::BatchRenderingTest::OnCleanUp()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     //Unbind Shader
     glUseProgram(0);
+    //Unbind textures
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
