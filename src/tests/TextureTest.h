@@ -28,7 +28,7 @@ namespace test {
 
 	private:
 
-		Shader shader;
+		Shader m_Shader;
 
 		glm::vec3 m_TranslationA;
 		glm::vec3 m_TranslationB;

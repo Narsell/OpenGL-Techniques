@@ -67,6 +67,13 @@ test::BatchRenderingTest::BatchRenderingTest()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+    //Getting uniform location and setting uniform value to array of integers containing texture slots
+    glUseProgram(shader.GetRendererId());
+    int texturesUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_Textures");
+    constexpr uint32_t textureCount = 2;
+    int textureSamplers[textureCount] = { 0, 1 };
+    glUniform1iv(texturesUniformLoc, textureCount, textureSamplers);
+
 }
 
 test::BatchRenderingTest::~BatchRenderingTest()
@@ -87,11 +94,6 @@ void test::BatchRenderingTest::OnRender()
     //Bind shader
     glUseProgram(shader.GetRendererId());
 
-    //Getting uniform location and setting uniform value to array of integers containing texture slots
-    int texturesUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_Textures");
-    int textureSamplers[2] = { 0, 1 };
-    glUniform1iv(texturesUniformLoc, 2, textureSamplers);
-
     //Get MVP uniform location and send data to that uniform location.
     int mvpUniformLoc = glGetUniformLocation(shader.GetRendererId(), "u_MVP");
     glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, &mvp[0][0]);
@@ -102,7 +104,9 @@ void test::BatchRenderingTest::OnRender()
 
     //Bind VAO and draw!
     glBindVertexArray(m_QuadVA);
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+
+    const uint32_t indexCount = 12;
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
 }
 
