@@ -34,7 +34,12 @@ test::BatchRenderingTest::BatchRenderingTest()
     // Generate, bind and RESERVE vertex buffer data.
     glCreateBuffers(1, &m_QuadVB);
     glBindBuffer(GL_ARRAY_BUFFER, m_QuadVB);
-    glBufferData(GL_ARRAY_BUFFER, 1000 * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+    const size_t MaxQuadCount = 100;                // Arbitrary max number of quads.
+    const size_t MaxVertexCount = 4 * MaxQuadCount; // Each quad has 4 vertices.
+    const size_t MaxIndexCount = 6 * MaxQuadCount;  // Each quad requires 6 indices.
+
+    glBufferData(GL_ARRAY_BUFFER, MaxVertexCount * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
     // Setting up vertex attributes
     // position attribute
@@ -50,14 +55,20 @@ test::BatchRenderingTest::BatchRenderingTest()
     glEnableVertexArrayAttrib(m_QuadVA, 3);
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(offsetof(Vertex, TexID)));
 
-    unsigned int indices [12] =
+    //Construct index buffer for all possible vertices
+    unsigned int indices[MaxIndexCount];
+    unsigned int offset = 0;
+    for (int i = 0; i < MaxIndexCount; i+=6)
     {
-        0, 1, 2,
-        2, 3, 0,
+        indices[i + 0] = offset + 0;
+        indices[i + 1] = offset + 1;
+        indices[i + 2] = offset + 2;
+        indices[i + 3] = offset + 2;
+        indices[i + 4] = offset + 3;
+        indices[i + 5] = offset + 0;
 
-        4, 5, 6,
-        6, 7, 4
-    };
+        offset += 4;
+    }
 
     glCreateBuffers(1, &m_QuadIB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
@@ -80,56 +91,62 @@ void test::BatchRenderingTest::OnUpdate(float deltaTime)
 {
 }
 
-static std::array<Vertex, 4> CreateQuad(float x, float y, float textureId)
+static Vertex* CreateVertex(Vertex*& buffer, glm::vec2 pos, glm::vec2 texCoords, float textureId, glm::vec4 color)
 {
-    float size = 100.f;
+    buffer->Position = pos;
+    buffer->Color = color;
+    buffer->TexCoords = texCoords;
+    buffer->TexID = textureId;
+    ++buffer;
+    return buffer;
+}
 
-    Vertex v0;
-    v0.Position = { x, y };
-    v0.Color = { 0.2f, 0.6f, 0.9f, 1.0f };
-    v0.TexCoords= { 0.0f, 0.0f };
-    v0.TexID = textureId;
+static Vertex* CreateQuad(Vertex*& buffer, uint32_t& indexCount, glm::vec2 position, float size, float textureId, glm::vec4 color = glm::vec4(1.f, 1.f, 1.f, 1.f))
+{
+    CreateVertex(buffer, { position.x, position.y }, {0.0f, 0.0f}, textureId, color);
+    CreateVertex(buffer, { position.x + size, position.y }, { 1.0f, 0.0f }, textureId, color);
+    CreateVertex(buffer, { position.x + size, position.y + size }, { 1.0f, 1.0f }, textureId, color);
+    CreateVertex(buffer, { position.x, position.y + size }, { 0.0f, 1.0f }, textureId, color);
 
-    Vertex v1;
-    v1.Position = { x + size, y };
-    v1.Color = { 0.2f, 0.6f, 0.9f, 1.0f };
-    v1.TexCoords = { 1.0f, 0.0f };
-    v1.TexID = textureId;
+    indexCount += 6;
 
-    Vertex v2;
-    v2.Position = { x + size, y + size};
-    v2.Color = { 0.2f, 0.6f, 0.9f, 1.0f };
-    v2.TexCoords = { 1.0f, 1.0f };
-    v2.TexID = textureId;
-
-    Vertex v3;
-    v3.Position = { x, y + size };
-    v3.Color = { 0.2f, 0.6f, 0.9f, 1.0f };
-    v3.TexCoords = { 0.0f, 1.0f };
-    v3.TexID = textureId;
-
-    return { v0, v1, v2, v3 };
+    return buffer;
 }
 
 void test::BatchRenderingTest::OnRender()
-{
-    const int quadsToRender = 2;
-    const int verticesPerQuad = 4;
+{    
+    //Define quad grid dimensions
+    const uint32_t gridWidth = 5;
+    const uint32_t gridHeight = 5;
+    const float quadSize = 50.f;
 
-    //Creating quads with all their vertices
-    std::array<Vertex, verticesPerQuad> q0 = CreateQuad(m_Quad1Position[0], m_Quad1Position[1], 1.0f);
-    std::array<Vertex, verticesPerQuad> q1 = CreateQuad(m_Quad2Position[0], m_Quad2Position[1], 2.0f);
+    //Keeps track of how many indices we need
+    uint32_t indexCount = 0;
 
-    //Allocating vertexData with enough memory for the two quads above
-    Vertex vertexData[quadsToRender * verticesPerQuad];
+    //Setup array of vertices
+    std::array<Vertex, 200> vertices;
 
-    //Copy quad0 and quad1 data into vertexData. (std::array.size() is really just element count >.>)
-    memcpy(vertexData, q0.data(), q0.size() * sizeof(Vertex));
-    memcpy(vertexData + q0.size(), q1.data(), q1.size() * sizeof(Vertex));
+    //Points to the next vertex array mem address
+    Vertex* bufferPtr = vertices.data();
+
+    //Creates the grid
+    for (int i = 0; i < gridWidth; i++)
+    {
+        for (int j = 0; j < gridHeight; j++)
+        {
+            float textureId =  (i + j) % 2 + 1.0f;
+            glm::vec2 position = { quadSize * i, quadSize * j };
+            CreateQuad(bufferPtr, indexCount, position, quadSize, textureId);
+        }
+    }
+
+    //Two additional quads controllable by ImGUI
+    CreateQuad(bufferPtr, indexCount, { m_Quad1Position[0], m_Quad1Position[1] }, quadSize, 0.0f, glm::vec4(0.2f, 0.8f, 0.2f, 1.0f));
+    CreateQuad(bufferPtr, indexCount, { m_Quad2Position[0], m_Quad2Position[1] }, quadSize, 0.0f, glm::vec4(0.8f, 0.2f, 0.2f, 1.0f));
 
     //Bind vertex buffer and set vertex data DYNAMICALLY (heck yes)
     glBindBuffer(GL_ARRAY_BUFFER, m_QuadVB);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexData), vertexData);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 
     //Defines translation of the actual vertex in device coords.
     glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
@@ -149,8 +166,7 @@ void test::BatchRenderingTest::OnRender()
 
     //Bind VAO and draw!
     glBindVertexArray(m_QuadVA);
-
-    const uint32_t indexCount = 12;
+    
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
 }
